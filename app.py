@@ -23,6 +23,8 @@ uploaded_file = st.file_uploader("Upload your portfolio CSV", type=["csv"])
 # Check if the file is uploaded
 if 'data_loaded' not in st.session_state:
     st.session_state.data_loaded = False
+if 'flag' not in st.session_state:
+    st.session_state.flag = False
 
 
 # Save the uploaded file as df and continue analysis
@@ -78,6 +80,8 @@ if st.session_state.data_loaded:
         st.markdown(f"### 📈 Snapshot of the financial performance {today}:")
         numeric_cols = report.select_dtypes(include='number').columns
         st.dataframe(report.style.format("{:.2f}", subset=numeric_cols))
+
+        st.session_state.flag = True
 
     # Tab 2
     with tab2:
@@ -148,11 +152,11 @@ if st.session_state.data_loaded:
 
                             st.session_state.df = df
                             st.success(f"Added {asset_name} to portfolio.")
-                            # st.rerun()
                         else:
                             st.error("Invalid ticker. Please try again.")
                     else:
                         st.error("Please enter valid asset details.")
+
 
     with tab3:
         if st.session_state.flag:
@@ -162,4 +166,6 @@ if st.session_state.data_loaded:
             csv = df.iloc[:, :10].to_csv(index=False).encode('utf-8')
 
             # Export the CSV
+            st.download_button(label="Download updated CSV", data=csv, file_name=f"assets-{today}.csv", mime="text/csv")
 
+            st.session_state.flag = True
